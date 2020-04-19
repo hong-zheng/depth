@@ -1,0 +1,181 @@
+#define _CRT_SECURE_NO_WARNINGS 1
+
+#include<iostream>
+#include<map>
+#include<stdlib.h> // memset
+#include<string.h> // malloc
+//#include<multimap>
+using namespace std;
+
+// "%d%*c%d" 中间的 %*c 为跳过一个字符
+// 图
+// 只能保存一个数据
+// 变量 常量 结构体 联合体 枚举
+
+// 保存多个数据
+// 线性：数组，动态数组(顺序表)，链表，队列，栈，堆
+// 线性结构查找效率是很低的
+// 可以分治
+
+// 保存数据，线性的升级：一对多
+// 树
+
+// 图-->多对多
+// 顶点：保存数据 
+// 边：描述数据之见的关联
+
+// 单行线、双行线
+// 无向图
+// 有向图
+
+// 图的常规描述方法
+//邻接矩阵
+//邻接表
+
+struct graph{
+	int vertexs; // 顶点个数
+	int edges;// 边的条数
+	
+	char* ver; // 描述顶点的一维数组
+	int** edg;// 描述边的二维数组
+};
+
+// 初始化图结构
+void initGraph(graph* g,bool alloc = false){
+	if (alloc){
+		g = new graph ;
+	}
+	g->edges = g->vertexs = 0;
+	g->edg = NULL;
+	g->ver = NULL;
+}
+
+// 通过顶点数据找矩阵下标
+int ver2idx(graph* g ,char ver){
+	for (int i = 0; i < g->vertexs;i++){
+		if (ver == g->ver[i]){
+			return i;
+		}
+	}
+	return -1;
+}
+
+void showGraph(graph* g){
+	printf("  ");
+	for (int i = 0; i < g->vertexs;i++){
+		printf("%c ",g->ver[i]);
+	}
+	printf("\n");
+
+	// 打印边
+	for (int i = 0; i < g->vertexs;i++){
+		printf("%c ",'A'+i);
+		for (int j = 0; j < g->vertexs;j++){
+			printf("%d ",g->edg[i][j]);
+		}
+		printf("\n");
+	}
+}
+// 设置图
+void setGraph( graph* g){
+	printf("请输入顶点个数:>\n");
+	scanf("%d",&(g->vertexs));
+
+	g->ver = new char[g->vertexs];// 开辟内存
+	
+	for (int i = 0; i < g->vertexs;i++){
+		//printf("请输入第%d个顶点:",i+1);
+		// scanf需要清空输入缓冲区
+		g->ver[i] = 'A' + i;  // 代为输入
+	}
+
+	// 开二维数组
+	//  开内存
+	g->edg = (int**)malloc(sizeof(int)*(g->vertexs));
+	for (int i = 0; i < g->vertexs;i++){
+		g->edg[i] = new int[g->vertexs];
+		memset(g->edg[i],0,sizeof(int)*(g->vertexs));
+	}
+
+	printf("请输入有多少条边:>\n");
+	scanf("%d", &(g->edges));
+
+	char buff[20];
+	for (int i = 0; i < g->edges;i++){
+		printf("请输入有%d条边(A,B):>\n",i+1);
+		scanf("%s",buff);
+
+		int row = ver2idx(g, buff[0]);
+		int col = ver2idx(g, buff[2]);
+
+		g->edg[row][col] = 1;
+		showGraph(g);
+	}
+}
+
+// 广度优先搜索
+void BFS(graph* g){
+
+}
+
+// 深度优先搜索
+void DFS(graph* g){
+	char c;
+	scanf("%*c");
+	printf("请输入顶点:");
+	scanf("%c",&c);
+	printf("起始顶点为%c!\n",c);
+
+	int begInx = ver2idx(g,c);
+
+	// 标记所有的顶点都没有找到过
+	bool* isFind = new bool[g->vertexs];
+	memset(isFind,0,sizeof(bool)*(g->vertexs));
+
+	// 标记起始顶点找过，并打印
+	isFind[begInx] = true;
+	printf("%c ",g->ver[begInx]);
+	bool isBack = false;
+	int count = 1;
+	int i;
+	while (1){
+		// 当前顶点开始，找相邻顶点
+		for (i = 0; i < g->vertexs;i++){
+			if (g->edg[begInx][i] == 1){ // 一行中找到一个
+				if (isFind[i] == false){ // 不重复，找到了
+					printf("%c ",g->ver[i]);
+					isFind[i] = true;
+					begInx = i;
+					count++;
+					break;
+				}
+				else{// 重复，找到了
+					continue;
+				}
+			}
+		}
+
+		if ( i == g->vertexs){
+			isBack = true;
+		}
+		if (isBack){
+			begInx = (begInx + 1)%g->vertexs;
+
+		}
+		// 判断是否找到过，找到过 continue ；没找到过，打印
+
+		//没有下一个顶点，回到起始顶点，换下一个相邻顶点
+		if (count >= g->vertexs){
+			break;
+		}
+		//printf("\n");
+	}
+}
+int main(){
+	graph graphics;
+	initGraph(&graphics);
+	setGraph(&graphics);
+	DFS(&graphics);
+	system("pause");
+	return 0;
+}
